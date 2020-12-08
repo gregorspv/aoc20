@@ -29,6 +29,10 @@ print(f"The maximal ID is {str(max([i[2] for i in seats]))}")
 # part 2
 all_IDs = [i[2] for i in seats]
 possible_IDs = [i+1 for i in all_IDs] + [i-1 for i in all_IDs]
-my_ID = set(possible_IDs) - set(all_IDs)
-IDs = ", ".join([str(e) for e in my_ID])
+my_ID = list(set(possible_IDs) - set(all_IDs))
+IDs=[]
+for id in range(len(my_ID)):
+    if my_ID[id]+1 in all_IDs and my_ID[id]-1 in all_IDs:
+        IDs.append(my_ID[id])
+IDs = ", ".join([str(e) for e in IDs])
 print(f"The seat ID is one of {IDs}.")
