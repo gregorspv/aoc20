@@ -4,33 +4,31 @@ import numpy
 with open("day10.txt") as df:
     joltages = df.read().splitlines()
 
+# convert from str to int and sort
 joltages = list(map(int, joltages))
 joltages.sort()
 
-# airplane chair, device adapter
+# add airplane chair, device adapter (store into a separate variable)
 joltages.insert(0, 0)
 device_adapter = joltages[-1] + 3
 joltages.append(device_adapter)
 
-diff_0 = 0
-diff_1 = 0
-diff_2 = 0
-diff_3 = 0
+differences={0:0, 1:0, 2:0, 3:0}
 
+# Python, I want my switch!
 for i in range(1, len(joltages)):
     if joltages[i] - joltages[i-1] == 0:
-        diff_0 += 1
+        differences[0] += 1
     elif joltages[i] - joltages[i-1] == 1:
-        diff_1 += 1
+        differences[1] += 1
     elif joltages[i] - joltages[i-1] == 2:
-        diff_2 += 1
+        differences[2] += 1
     elif joltages[i] - joltages[i-1] == 3:
-        diff_3 += 1
+        differences[3] += 1
 
-print(f"The desired number is {str(diff_1 * diff_3)}")
+print(f"The desired number is {str(differences[1] * differences[3])}")
 
 # part 2
-
 chain_counter = 0
 
 # WORKS but SLOW
@@ -47,12 +45,12 @@ chain_counter = 0
 #
 # construct_chain([0])
 
-# relate all possible connections to an adapter
+# all possible connections to an adapter in form {adapter: connections}
 connections = {}
 for adapter in joltages:
     connections[adapter] = [a for a in joltages if 0 < a - int(adapter) <= 3]
 
-# make a reverse dict, i.e. all possible ways to get to an adapter
+# reverse connections, i.e. all possible ways to get to an adapter in form {adapter: sources}
 reverse_connections = {}
 for adapter in joltages:
     intermediate = []
@@ -61,25 +59,24 @@ for adapter in joltages:
             intermediate.append(a)
     reverse_connections[adapter] = intermediate
 
-def reverse_counter(end, begin): # counts possible paths from begin to end
+def reverse_counter(end, begin): # counts possible paths from begin to end (only for nodes, see below)
     returner = 0
-    for adapter in [i for i in reverse_connections[end] if int(i) >= int(begin)]:
-        # print(adapter, end, begin)
+    for adapter in [i for i in reverse_connections[end] if int(i) >= int(begin)]: # consider possible sources but not those that come before begin
         if adapter == begin:
-            returner += 1
+            returner += 1 # path length = 1
         else:
-            returner += 1 * reverse_counter(adapter, begin)
-        # print(adapter, returner)
+            returner += reverse_counter(adapter, begin) # path length = sum of possible paths to adapter
     return returner
 
-# find nodes (points that are necessarily included in the chain, e. g. 0)
+# find "nodes" (points that are necessarily included in the chain, e.g. 0, device_adapter)
 nodes = [0] # the first element is necessary
 
-# those that are 3 apart with nothing in between are both necessary
+# those that are 3 apart with nothing in between are both necessary / inevitable
 for e in joltages:
     if e+3 in joltages and e+1 not in joltages and e+2 not in joltages:
-        if e not in nodes: # yes it is inefficient, but have you seen lines 36-48?
+        if e not in nodes: # yes this could be made more efficient, but have you seen lines 36-48?
             nodes.append(e)
+        if e+3 not in nodes:
             nodes.append(e+3)
 
 if device_adapter not in nodes:
@@ -88,8 +85,8 @@ if device_adapter not in nodes:
 # find the number of ways to get to each node from the previous node
 ways_to_nodes = []
 for i in range(1,len(nodes)):
-    ways_to_nodes.append(reverse_counter(nodes[i], nodes[i-1]))
+    ways_to_nodes.append(reverse_counter(nodes[i], nodes[i-1])) # 0-first, first-second etc.
 
-chain_counter = numpy.prod(ways_to_nodes)
+chain_counter = numpy.prod(ways_to_nodes) # from combinatorics, all possible paths are prod of paths between "nodes"
 
 print(f"The total number of chains is {chain_counter}")
