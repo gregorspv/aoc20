@@ -1,7 +1,6 @@
 # part 1
 
 from copy import deepcopy
-from operator import methodcaller, getitem
 
 with open("day11.txt") as df:
     seats = list(map(list,df.read().splitlines()))
@@ -17,25 +16,17 @@ seats.append(list("."*(n_columns+2)))
 
 # find number of occupied adjacent seats
 def occupied_seats(row, column, matrix):
-    returner=0
-    if matrix[row][column - 1] == "#":
-        returner += 1
-    if matrix[row][column + 1] == "#":
-        returner += 1
-    if matrix[row - 1][column - 1] == "#":
-        returner += 1
-    if matrix[row + 1][column - 1] == "#":
-        returner += 1
-    if matrix[row - 1][column + 1] == "#":
-        returner += 1
-    if matrix[row + 1][column + 1] == "#":
-        returner += 1
-    if matrix[row - 1][column] == "#":
-        returner += 1
-    if matrix[row + 1][column] == "#":
-        returner += 1
-    return returner
+    conditions = []
+    conditions.append(matrix[row][column - 1] == "#")
+    conditions.append(matrix[row][column + 1] == "#")
+    conditions.append(matrix[row - 1][column - 1] == "#")
+    conditions.append(matrix[row + 1][column - 1] == "#")
+    conditions.append(matrix[row - 1][column + 1] == "#")
+    conditions.append(matrix[row + 1][column + 1] == "#")
+    conditions.append(matrix[row - 1][column] == "#")
+    conditions.append(matrix[row + 1][column] == "#")
 
+    return sum(conditions)
 
 # print whole seat matrix
 def print_seats(matrix):
@@ -162,15 +153,6 @@ while new_matrix != old_matrix: # break once there is no change
     for row in range(1, n_rows+1):
         for column in range(1, n_columns+1):
             new_matrix[row][column] = change(row, column, old_matrix)
-
-def counter(query, matrix):
-    returner = 0
-    for row in range(1, n_rows+1):
-        for column in range(1, n_columns+1):
-            if matrix[row][column] == query:
-                returner += 1
-
-    return returner
 
 n_occupied = counter("#", new_matrix)
 print(f"The number of occupied seats is {n_occupied}.")
